@@ -5,6 +5,7 @@ namespace App\Command;
 
 
 use Abraham\TwitterOAuth\TwitterOAuth;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use Symfony\Component\Console\Command\Command;
@@ -46,22 +47,26 @@ class InsertDataCommand extends Command
 
 
         $connection = new TwitterOAuth('VrZO81nW8xajx2m2SCKoWDZvn', 'j2wyHisxIv1h555A7KE8q259DObTUtcflRVpgGdwtPRHJZRbqx', null, $access_token);
+        $connection->setTimeouts(150, 150);
+
 
         $maxId     = 0;
         $allTweets = [];
+        $j = 0;
 
         $statuses = $this->getTweets($connection, $maxId);
 
         array_push($allTweets, $statuses->statuses);
         $tweets    = $statuses->statuses;
 
-        while (sizeof($tweets) > 0) {
+        while (sizeof($tweets) > 0 && $j < 50) {
             $statuses = $this->getTweets($connection, $maxId);
             $tweets    = $statuses->statuses;
             if (sizeof($tweets) > 0) {
                 array_push($allTweets, $statuses->statuses);
                 $maxId     = end($tweets)->id - 1;
             }
+            $j++;
         }
 
         for ($i = 0; $i < sizeof($allTweets); $i++) {
@@ -75,9 +80,10 @@ class InsertDataCommand extends Command
                     [
                         'json' => [
                             'text' => $data->full_text,
-                            'idTwitt' => $data->id,
-                            'userName'=> $data->user->name
-
+                            'followers' => $data->user->followers_count,
+                            'createdDate' => $data->user->created_at,
+                            'localisation' => $data->user->location,
+                            'lang'       => $data->lang
                         ]
                     ]
                 );
@@ -91,6 +97,6 @@ class InsertDataCommand extends Command
     }
 
     public function getTweets($connection, $maxId) {
-        return $connection->get("search/tweets", ["q" => "%23cours+OR+%23distanciel+OR+%23lycée+OR+%23étudiant+OR+%23distance+OR+%23zoom+OR+%23teams", "max_id" => $maxId, "count" => "100", 'lang' => 'fr', 'tweet_mode' => 'extended']);
+        return $connection->get("search/tweets", ["q" => "%23workfromhome", "max_id" => $maxId, "count" => "100", 'tweet_mode' => 'extended']);
     }
 }

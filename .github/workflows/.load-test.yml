@@ -21,3 +21,15 @@ jobs:
         uses: k6io/action@v0.1
         with:
           filename: assets/js/test.js
+
+  k6_load-2_test:
+    name: k6 load-2 test run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Run k6 load-2 test
+        uses: k6io/action@v0.1
+        with:
+          filename: assets/js/test-2.js

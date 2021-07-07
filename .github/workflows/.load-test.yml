@@ -11,13 +11,18 @@ on:
 jobs:
   k6_load_test:
     name: k6 Load Test
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Run local k6 test
-        uses: k6io/action@v0.1
-        with:
-          filename: assets/js/test.js
+      - name: download and extract k6 release binaries
+        run: |
+          curl -L https://github.com/loadimpact/k6/releases/download/v0.26.2/k6-v0.26.2-win64.zip -o k6.zip
+          7z.exe e k6.zip
+        shell: bash
+
+      - name: k6 test
+        run: ./k6.exe run assets.js/test.js
+        shell: bash
